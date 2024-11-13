@@ -32,7 +32,7 @@ function BtnSingIn({ children }: { children: React.ReactNode }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <SignUpButton mode="modal">
-            <button className="w-full text-left">Sugn up</button>
+            <button className="w-full text-left">Sign up</button>
           </SignUpButton>
           {/* <SignOutButton /> */}
         </DropdownMenuItem>
@@ -94,8 +94,8 @@ async function LinksDropdown() {
               <DropdownMenuItem>
                 {/* LOG-OUT */}
                 {/* <p>TEST LOG_OUT</p> */}
-                <SignOutButton redirectUrl="/products" />
-                {/* <SignOutLink /> */}
+                {/* <SignOutButton redirectUrl="/products" /> */}
+                <SignOutLink />
               </DropdownMenuItem>
             </>
           </BtnSingIn>

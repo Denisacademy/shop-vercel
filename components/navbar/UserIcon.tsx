@@ -6,7 +6,7 @@ async function UserIcon() {
   const { userId } = auth();
   //async
   const user = await currentUser();
-  console.log("user-icon", user, userId);
+  // console.log("user-icon", user, userId);
   const profileImage = user?.imageUrl;
 
   if (profileImage) {

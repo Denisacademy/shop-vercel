@@ -43,6 +43,8 @@ function BtnSingIn({ children }: { children: React.ReactNode }) {
 }
 
 async function LinksDropdown() {
+  const { userId } = auth();
+  console.log("id", userId, process.env.ADMIN_USER_ID);
   return (
     <DropdownMenu>
       {/* ONLY TRIGGER */}
@@ -82,6 +84,9 @@ async function LinksDropdown() {
             {/* <div>USE ARE LOGIN</div> */}
             <>
               {links.map((link) => {
+                if (link.label === "admin" && userId !== process.env.ADMIN_USER_ID) {
+                  return null;
+                }
                 return (
                   <DropdownMenuItem key={link.href}>
                     <Link href={link.href} className="capitalize w-full">

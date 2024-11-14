@@ -12,10 +12,12 @@ const initialState = {
 
 function FormContainer({ action, children }: { action: actionFunction; children: React.ReactNode }) {
   //            form action
+
   const [state, formAction] = useFormState(action, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("state", state);
     if (state.message) {
       toast({ description: state.message });
     }

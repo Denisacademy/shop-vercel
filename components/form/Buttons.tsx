@@ -19,6 +19,7 @@ type SubmitButtonProps = {
 
 function SubmitButton({ className, text, size }: SubmitButtonProps) {
   const { pending } = useFormStatus();
+  console.log("penging", pending); //false;
   return (
     <Button type="submit" disabled={pending} className={cn("capitalize", className)} size={size}>
       {pending ? (

@@ -47,6 +47,12 @@ export const fetchProduct = async (productId: string) => {
   return product;
 };
 
-export const createProductAction = async (prevState: any, formData: FormData): Promise<{ message: string }> => {
-  return { message: "product created" };
+export const createProductAction = async (
+  prevState: any,
+  formData: FormData
+): Promise<{ message: string }> => {
+  const answer = { message: "product created from SCR" };
+  console.log("answer", answer);
+  await new Promise((resolve) => setTimeout(resolve, 15000));
+  return answer;
 };

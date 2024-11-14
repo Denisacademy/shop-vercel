@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 function Sidebar() {
   const pathname = usePathname();
 
-  console.log("L_I_N_K", adminLinks);
+  // console.log("L_I_N_K", adminLinks);
   return (
     <aside>
       {adminLinks.map((link) => {

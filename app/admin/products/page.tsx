@@ -1,5 +1,7 @@
-function ProductsPageAdmin() {
-  return <div>ProductsPageAdmin</div>;
+import React from "react";
+
+function PrductAdmin() {
+  return <div>PrductAdmin</div>;
 }
 
-export default ProductsPageAdmin;
+export default PrductAdmin;

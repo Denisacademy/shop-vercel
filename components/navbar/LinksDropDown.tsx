@@ -44,7 +44,7 @@ function BtnSingIn({ children }: { children: React.ReactNode }) {
 
 async function LinksDropdown() {
   const { userId } = auth();
-  console.log("id", userId, process.env.ADMIN_USER_ID);
+  // console.log("id", userId, process.env.ADMIN_USER_ID);
   return (
     <DropdownMenu>
       {/* ONLY TRIGGER */}

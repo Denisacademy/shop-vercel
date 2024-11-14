@@ -1,3 +1,4 @@
+"use server";
 import { redirect } from "next/navigation";
 import db from "../utils/db";
 
@@ -44,4 +45,8 @@ export const fetchProduct = async (productId: string) => {
   }
 
   return product;
+};
+
+export const createProductAction = async (prevState: any, formData: FormData): Promise<{ message: string }> => {
+  return { message: "product created" };
 };

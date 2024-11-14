@@ -19,7 +19,7 @@ function FormContainer({ action, children }: { action: actionFunction; children:
   useEffect(() => {
     console.log("state", state);
     if (state.message) {
-      toast({ description: state.message });
+      toast({ variant: "success", description: state.message });
     }
   }, [state, toast]);
 

@@ -15,7 +15,14 @@ const FormInput = ({ name, type, label, defaultValue, placeholder }: FormInputPr
       <Label htmlFor={name} className="capitalize">
         {label || name}
       </Label>
-      <Input id={name} name={name} type={type} defaultValue={defaultValue} placeholder={placeholder} required />
+      <Input
+        id={name}
+        name={name}
+        type={type}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        required
+      />
     </div>
   );
 };

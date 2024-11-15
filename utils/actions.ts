@@ -2,6 +2,8 @@
 import { redirect } from "next/navigation";
 import db from "../utils/db";
 import { currentUser } from "@clerk/nextjs/server";
+// import img5 from "../public/img5.jpeg";
+import img4 from "@/public/img4.jpeg";
 
 // IT IS MORE EXPLICIT
 export const fetchFeaturedProducts = async () => {
@@ -89,15 +91,25 @@ export const createProductAction = async (
     const price = Number(formData.get("price") as string);
     //temp
     const image = formData.get("image") as File;
+    // console.log("image-next-js", image);
     const description = formData.get("description") as string;
     const featured = Boolean(formData.get("featured") as string);
 
+    // let currentImage = null;
+    // if (image instanceof Blob) {
+    //   currentImage = image;
+    // }
+    // console.log("image-file", image, image instanceof Blob);
+    // console.log(image);
     await db.product.create({
       data: {
         name,
         company,
         price,
-        image: "../public/img1.jpeg",
+        // image: img5,
+        // image: "@/public/img4.jpeg",
+        image: "/images/img12.jpg",
+
         description,
         featured,
         clerkId: user.id,
@@ -108,7 +120,7 @@ export const createProductAction = async (
   } catch (error) {
     console.log(error);
     // hard code error unknown
-    return renderError(error);
+    return renderError("renderError" + error);
     // return { message: error instanceof Error ? error.message : "there was an error" };
   }
   // console.log("answer", answer, { name, price, image });

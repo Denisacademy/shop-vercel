@@ -5,7 +5,8 @@ import { currentUser } from "@clerk/nextjs/server";
 // import img5 from "../public/img5.jpeg";
 import img4 from "@/public/img4.jpeg";
 import { z, ZodSchema } from "zod";
-import { productSchema, validateWithZodSchema } from "./schemas";
+import { imageSchema, productSchema, validateWithZodSchema } from "./schemas";
+import { uploadImage } from "./supabase";
 // IT IS MORE EXPLICIT
 export const fetchFeaturedProducts = async () => {
   // await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -51,20 +52,6 @@ export const fetchProduct = async (productId: string) => {
   return product;
 };
 
-export const createProductAction__ = async (
-  prevState: any,
-  formData: FormData
-): Promise<{ message: string }> => {
-  const answer = { message: "product created from SCR" };
-  const name = formData.get("name");
-  const price = formData.get("price");
-  const image = formData.get("image");
-  const description = formData.get("description");
-  console.log("answer", answer);
-  await new Promise((resolve) => setTimeout(resolve, 15000));
-  return answer;
-};
-
 // AUTH
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -84,44 +71,29 @@ export const createProductAction = async (
 
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  // TS ERROR
   const user = await getAuthUser();
   try {
     const rawData = Object.fromEntries(formData);
-    // const validateFields = productSchema.parse(rawData);
-    // const validateFields = productSchema.safeParse(rawData);
+    const file = formData.get("image") as File;
     const validatedFields = validateWithZodSchema(productSchema, rawData);
+    const validateFile = validateWithZodSchema(imageSchema, { image: file });
+    const fullPath = await uploadImage(validateFile.image);
 
     await db.product.create({
       data: {
         ...validatedFields,
-        image: "/images/img15.jpg",
+        // image: "/images/img15.jpg",
+        image: fullPath,
         clerkId: user.id,
       },
     });
-    // if (!validatedFields.success) {
-    //   const errors = validatedFields.error.errors.map((error) => error.message);
-    //   throw new Error(errors.join(","));
-    // }
-    // await db.product.create({
-    //   data: {
-    //     name,
-    //     company,
-    //     price,
-    //     image: "/images/img12.jpg",
-    //     description,
-    //     featured,
-    //     clerkId: user.id,
-    //   },
-    // });
 
-    return { message: "product created" };
+    // return { message: "product created" };
   } catch (error) {
     console.log("Error-catch", error);
     // hard code error unknown
     return renderError(error);
     // return { message: error instanceof Error ? error.message : "there was an error" };
   }
-  // console.log("answer", answer, { name, price, image });
-  // return answer;
+  redirect("/admin/products");
 };

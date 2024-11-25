@@ -33,4 +33,30 @@ function SubmitButton({ className, text, size }: SubmitButtonProps) {
   );
 }
 
+export type actionType = "edit" | "delete";
+
+export const IconButton = ({ actionType }: { actionType: actionType }) => {
+  const { pending } = useFormStatus();
+
+  const renderIcon = () => {
+    switch (actionType) {
+      case "edit":
+        return <LuPenSquare />;
+      case "delete":
+        return <LuTrash2 />;
+      // prevent from adding another type magicTS
+
+      default:
+        const never: never = actionType; //swicth only 2case so amy extra type will be error
+        throw new Error(`invalid action type: ${never}`);
+    }
+  };
+
+  return (
+    <Button type="submit" size="icon" variant="link" className="p-2 cursor-pointer">
+      {pending ? <ReloadIcon className="animate-spin" /> : renderIcon()}
+    </Button>
+  );
+};
+
 export default SubmitButton;

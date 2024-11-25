@@ -7,6 +7,7 @@ import img4 from "@/public/img4.jpeg";
 import { z, ZodSchema } from "zod";
 import { imageSchema, productSchema, validateWithZodSchema } from "./schemas";
 import { uploadImage } from "./supabase";
+import { revalidatePath } from "next/cache";
 // IT IS MORE EXPLICIT
 export const fetchFeaturedProducts = async () => {
   // await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -58,6 +59,15 @@ const getAuthUser = async () => {
   if (!user) redirect("/");
   return user;
 };
+
+const getAdminUser = async () => {
+  const user = await getAuthUser();
+  if (user.id !== process.env.ADMIN_USER_ID) {
+    redirect("/");
+  }
+  return user;
+};
+
 // ERROR MESSAGE
 const renderError = (error: unknown): { message: string } => {
   return { message: error instanceof Error ? error.message : "there was an error" };
@@ -96,4 +106,31 @@ export const createProductAction = async (
     // return { message: error instanceof Error ? error.message : "there was an error" };
   }
   redirect("/admin/products");
+};
+
+export const fetchAdminProducts = async () => {
+  // is some cases we return value some check
+  await getAdminUser();
+  const products = await db.product.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return products;
+};
+
+export const deleteProductAction = async (prevState: { productId: string }) => {
+  const { productId } = prevState;
+  getAdminUser();
+  try {
+    await db.product.delete({
+      where: {
+        id: productId,
+      },
+    });
+    revalidatePath("/admin/products");
+    return { message: "product remove" };
+  } catch (error) {
+    return renderError(error);
+  }
 };

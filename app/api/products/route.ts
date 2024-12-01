@@ -3,10 +3,9 @@ import { fetchFeaturedProducts } from "@/utils/actions";
 
 import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async (
-  req: NextRequest,
-  res: NextResponse
-) => {
+export const GET = async (req: NextRequest, res: NextResponse) => {
   const products = await fetchFeaturedProducts();
-  return NextResponse.json(products);
+  // console.log("PRODUCTS", products);
+  // return NextResponse.json({ products });
+  return Response.json(products);
 };

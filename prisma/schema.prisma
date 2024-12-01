@@ -6,7 +6,6 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
-  // previewFeatures = ["strictUndefinedChecks"]
 }
 
 
@@ -15,10 +14,10 @@ model Product {
   name        String
   company     String
   description String
-  featured   Boolean
+  featured    Boolean
   image       String
   price       Int
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  clerkId  String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  clerkId     String
 }

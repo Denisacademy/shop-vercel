@@ -1,0 +1,220 @@
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // previewFeatures = ["strictUndefinedChecks"]
+}
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  password String?
+
+  name String @default("Ivan")  
+  store Store[] //***
+
+
+  orders Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites Favorite[]
+}
+//one to many
+model Store {
+
+ //products Product[] //store has many products
+
+  id String @id @default(uuid())
+  title String
+  description String?
+
+  user User @relation(fields: [userId], references: [id]) //***
+  userId String
+
+  categories Category[]
+
+  products Product[] //**
+
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+//one to one but one shop has many products
+model Product {
+  id String @id @default(uuid())
+  title String
+
+  price Int
+  description String?
+  // images String[]
+
+  store Store @relation(fields: [storeId], references: [id]) //**
+  storeId String
+
+  category Category @relation(fields: [categoryId],references: [id])
+  categoryId String
+
+  favorites Favorite[] 
+
+  //one product has one color
+  color Color @relation(fields: [colorId], references: [id])
+  colorId String
+
+
+  reviews Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Favorite {
+  id String @id @default(uuid())
+
+  product Product @relation(fields: [productId], references: [id])
+  productId String
+
+  user User @relation(fields: [userId], references: [id])
+  userId String
+}
+
+
+//one product has one category one category has many
+model Category {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  store  Store @relation(fields: [storeId], references: [id])
+  storeId String @unique
+
+
+  title String
+  description String
+}
+
+
+model Color {
+  id String @id @default(uuid())
+  color String
+  value String
+  
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+id String @id @default(uuid())
+
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+text String
+rating Int
+
+product Product @relation(fields: [productId], references: [id])
+productId String
+
+}
+
+enum EnumOrderStatus {
+  PENDING
+  PAYED
+}
+
+model Order {
+  id String @id @default(uuid())
+  status EnumOrderStatus @default(PENDING)
+  total Int 
+
+  user User @relation(fields: [userId], references: [id])
+  userId String
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model OrderItem {
+id String @id @default(uuid())
+
+order Order @relation(fields: [orderId], references: [id])
+orderId String
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+}
+
+model Post {
+    id         Int                 @id @default(autoincrement())
+  title      String
+  tags TagPost[]
+}
+
+model TagPost {
+  id    Int                 @id @default(autoincrement())
+  name  String
+  posts Post[]
+}
+
+
+
+//#USER
+//fetchUserOrders
+//findExistingReview
+//fetchUserFavorites
+//fetchProductReviewsByUser
+
+//#ADMIN
+//fetchAdminProducts***
+//fetchAdminProductDetails***
+//fetchAdminOrders
+
+//#PRODUCTS
+//fetchFeaturedProducts
+//fetchAllProducts***
+//fetchSingleProduct***
+
+//REVIEWS   
+//fetchAllReviews
+//fetchProductReviews
+//Review Action
+
+
+//FAVORITE
+//fetchFavoriteId
+
+//CART
+//fetchOrCreateCart
+//updateOrCreateCartItem
+//fetchCartItems
+
+
+//ACTIONS 11
+//createProduct
+//deleteProduct
+//updateProduct
+//updateProductImageAction
+
+//toggleFavoriteAction
+
+
+//createReviewAction
+//deleteReviewAction
+
+
+//addToCartAction
+//removeCartItemAction
+//updateCartItemAction
+
+//createOrderAction

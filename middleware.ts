@@ -1,17 +1,28 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPublicRoute = createRouteMatcher(["/", "/products(.*)", "/about"]);
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isPublicRoute = createRouteMatcher(["/", "/api/products(.*)", "/about"]);
+const isAdminRoute = createRouteMatcher(["/api/admin(.*)"]);
 
 export default clerkMiddleware((auth, request) => {
+  const queryAdmin = request.nextUrl.searchParams.get("admin");
   const isAdminUser = auth().userId === process.env.ADMIN_USER_ID;
+  const apiAdminKey = process.env.ADMIN_USER_ID === queryAdmin;
 
+  // console.log("clerkMiddleware", request.body);
+  if (apiAdminKey) {
+    console.log("apiAdminKey", "allProducts");
+    return NextResponse.next();
+  }
+  // console.log("no_admin", request.url);
   if (isAdminRoute(request) && !isAdminUser) {
+    // console.log("NO_ADMIN", request.url);
     return NextResponse.redirect(new URL("/", request.url));
   }
-
+  // console.log("isAdminUser", request.nextUrl.searchParams.get("admin"));
+  // console.log("1");
   if (!isPublicRoute(request)) {
+    // console.log("ADMIN", request.url);
     auth().protect();
   }
 });
@@ -24,3 +35,26 @@ export const config = {
     "/(api|trpc)(.*)",
   ],
 };
+
+//next.config, middleware,
+//api/admin/products,
+//prisma schema.prisma, [Cart, Product]
+//utils db, supabase-bucket[Uplaod_Image], actions, schemas
+
+//useSearchParams, useRouter{replace}, new URLSearchParams
+//searchParams : { layout? : string; search? : string }
+
+//clerk, toast, zod, suspense, 'use-client' -> error/loading
+//products[id] params: {id: string}
+//revalidatePath("/admin/products");
+
+//one to one @unique
+/*
+one to many User posts  Post[] 
+
+Post 
+  id @default @id(uui())
+  title
+  user String User @relation(fileds:userId, references[id])
+  userId 
+*/

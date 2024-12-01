@@ -48,6 +48,11 @@ export const config = {
 //products[id] params: {id: string}
 //revalidatePath("/admin/products");
 
+//useFormState(initState, action) form
+//{pending} = useFormStatus button
+
+//supabase uploadImage/create and deleteImage/delete
+
 //one to one @unique
 /*
 one to many User posts  Post[] 

@@ -6,7 +6,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import img4 from "@/public/img4.jpeg";
 import { z, ZodSchema } from "zod";
 import { imageSchema, productSchema, validateWithZodSchema } from "./schemas";
-import { uploadImage } from "./supabase";
+import { deleteImage, uploadImage } from "./supabase";
 import { revalidatePath } from "next/cache";
 // IT IS MORE EXPLICIT
 export const fetchFeaturedProducts = async () => {
@@ -79,7 +79,7 @@ export const createProductAction = async (
 ): Promise<{ message: string }> => {
   // const answer = { message: "product created from SCR" };
 
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
 
   const user = await getAuthUser();
   try {
@@ -87,6 +87,8 @@ export const createProductAction = async (
     const file = formData.get("image") as File;
     const validatedFields = validateWithZodSchema(productSchema, rawData);
     const validateFile = validateWithZodSchema(imageSchema, { image: file });
+
+    // load in supabase bucket our image
     const fullPath = await uploadImage(validateFile.image);
 
     await db.product.create({
@@ -121,15 +123,16 @@ export const fetchAdminProducts = async () => {
 
 export const deleteProductAction = async (prevState: { productId: string }) => {
   const { productId } = prevState;
-  getAdminUser();
+  await getAdminUser();
   try {
-    await db.product.delete({
+    const product = await db.product.delete({
       where: {
         id: productId,
       },
     });
+    await deleteImage(product.image);
     revalidatePath("/admin/products");
-    return { message: "product remove" };
+    return { message: "product removed" };
   } catch (error) {
     return renderError(error);
   }

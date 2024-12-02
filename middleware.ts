@@ -44,6 +44,12 @@ export const config = {
 //useSearchParams, useRouter{replace}, new URLSearchParams
 //searchParams : { layout? : string; search? : string }
 
+//TODO: function DeleteProduct({ productId }: { productId: string }) {
+//const deleteProduct = deleteProductAction.bind(null, { productId });
+
+//TODO: const IconButton = ({ actionType }: { actionType: actionType }) => {
+//const { pending } = useFormStatus();
+
 //clerk, toast, zod, suspense, 'use-client' -> error/loading
 //products[id] params: {id: string}
 //revalidatePath("/admin/products");

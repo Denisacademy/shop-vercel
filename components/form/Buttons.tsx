@@ -17,7 +17,7 @@ type SubmitButtonProps = {
   size?: btnSize;
 };
 
-function SubmitButton({ className, text, size }: SubmitButtonProps) {
+export function SubmitButton({ className, text, size }: SubmitButtonProps) {
   const { pending } = useFormStatus();
   console.log("penging", pending); //false;
   return (
@@ -47,7 +47,7 @@ export const IconButton = ({ actionType }: { actionType: actionType }) => {
       // prevent from adding another type magicTS
 
       default:
-        const never: never = actionType; //swicth only 2case so amy extra type will be error
+        const never: never = actionType; //switch only 2case so amy extra type will be error
         throw new Error(`invalid action type: ${never}`);
     }
   };

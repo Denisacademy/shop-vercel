@@ -1,16 +1,21 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 
-const ImageInput = () => {
+function ImageInput() {
   const name = "image";
+
   return (
     <div className="mb-2">
       <Label htmlFor={name} className="capitalize">
         Image
       </Label>
-      <input id={name} name={name} type="file" required accept="image/*" />
+      <Input id={name} name={name} type="file" required accept="image/*" />
+      {/* <input
+        name={name}
+        type="file"
+        className="opacity-10 p-2 outline outline-2 outline-offset-2 rounded-md"
+      /> */}
     </div>
   );
-};
-
+}
 export default ImageInput;

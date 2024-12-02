@@ -13,7 +13,7 @@ import { deleteProductAction, fetchAdminProducts } from "@/utils/actions";
 import { formatCurrency } from "@/utils/format";
 import Link from "next/link";
 
-async function PrductAdmin() {
+async function ProductAdmin() {
   const products = await fetchAdminProducts();
 
   return (
@@ -45,10 +45,11 @@ async function PrductAdmin() {
                 <TableCell>{company}</TableCell>
                 <TableCell>{totalPrice}</TableCell>
                 <TableCell className="flex items-center gap-x-2">
+                  {/* EDIT */}
                   <Link href={`/admin/products/${product.id}/edit`}>
                     <IconButton actionType="edit" />
                   </Link>
-
+                  {/* DELETE */}
                   <DeleteProduct productId={product.id} />
                 </TableCell>
               </TableRow>
@@ -61,6 +62,7 @@ async function PrductAdmin() {
 }
 
 function DeleteProduct({ productId }: { productId: string }) {
+  //                        ACTION SERVER
   const deleteProduct = deleteProductAction.bind(null, { productId });
 
   return (
@@ -70,4 +72,4 @@ function DeleteProduct({ productId }: { productId: string }) {
   );
 }
 
-export default PrductAdmin;
+export default ProductAdmin;

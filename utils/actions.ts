@@ -124,6 +124,7 @@ export const fetchAdminProducts = async () => {
 export const deleteProductAction = async (prevState: { productId: string }) => {
   const { productId } = prevState;
   await getAdminUser();
+
   try {
     const product = await db.product.delete({
       where: {
@@ -132,8 +133,40 @@ export const deleteProductAction = async (prevState: { productId: string }) => {
     });
     await deleteImage(product.image);
     revalidatePath("/admin/products");
+
+    // message to toast
     return { message: "product removed" };
   } catch (error) {
     return renderError(error);
   }
+};
+
+// EDIT/PAGE PRODUCT
+export const fetchAdminProductDetails = async (productId: string) => {
+  await getAdminUser();
+
+  const product = await db.product.findUnique({
+    where: {
+      id: productId,
+    },
+  });
+  if (!product) {
+    redirect("/admin/products");
+    // return { message: "product not found" };
+  }
+  return product;
+};
+
+export const updateProductAction = async (
+  prevState: any,
+  formData: FormData
+): Promise<{ message: string }> => {
+  return { message: "product updated" };
+};
+
+export const updateProductImageAction = async (
+  prevState: any,
+  formData: FormData
+): Promise<{ message: string }> => {
+  return { message: "product image updated" };
 };

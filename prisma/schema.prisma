@@ -1,7 +1,7 @@
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
-  directUrl         = env("DIRECT_URL")
+  provider         = "postgresql"
+  url              = env("DATABASE_URL")
+  directUrl        = env("DIRECT_URL")
 }
 
 generator client {
@@ -11,13 +11,13 @@ generator client {
 
 model Product {
   id           String     @id @default(uuid())
-  name        String
-  company     String
-  description String
-  featured    Boolean
-  image       String
-  price       Int
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  clerkId     String
+  name         String
+  company      String
+  description  String
+  featured     Boolean
+  image        String
+  price        Int
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  clerkId      String
 }

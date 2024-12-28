@@ -15,17 +15,21 @@ async function EditProductPage({ params }: { params: { id: string } }) {
     <section>
       <h1 className="text-2xl font-semibold mb-8 capitalize">update product</h1>
       <div className="border p-8 rounded">
+        {/* IMAGE */}
         <ImageInputContainer
           action={updateProductImageAction}
           name={name}
           image={product.image}
           text="update image"
         >
+          {/*type="hidden" name="id" NEED TO UPDATE IN BASE */}
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="url" value={product.image} />
         </ImageInputContainer>
+        {/* FIELDS */}
         <FormContainer action={updateProductAction}>
           <div className="grid gap-4 md:grid-cols-2 my-4">
+            {/*type="hidden" name="id" NEED TO UPDATE IN BASE */}
             <input type="hidden" name="id" value={id} />
             <FormInput type="text" name="name" label="product name" defaultValue={name} />
             <FormInput type="text" name="company" defaultValue={company} />

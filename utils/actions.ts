@@ -6,8 +6,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import img4 from "@/public/img4.jpeg";
 import { z, ZodSchema } from "zod";
 import { imageSchema, productSchema, validateWithZodSchema } from "./schemas";
-import { deleteImage, uploadImage } from "./supabase";
+import { deleteImage, supabase, uploadImage } from "./supabase";
 import { revalidatePath } from "next/cache";
+import prisma from "../utils/db";
 // IT IS MORE EXPLICIT
 export const fetchFeaturedProducts = async () => {
   // await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -161,12 +162,54 @@ export const updateProductAction = async (
   prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
-  return { message: "product updated" };
+  // ALL FIELDS
+  const rawData = Object.fromEntries(formData);
+  try {
+    const productId = formData.get("id") as string;
+    const validateData = validateWithZodSchema(productSchema, rawData);
+
+    await db.product.update({
+      // form has hidden input with id
+      where: {
+        id: productId,
+      },
+      data: { ...validateData },
+    });
+
+    revalidatePath("/admin/products/" + productId + "/edit");
+    return { message: "product updated" };
+  } catch (error) {
+    return renderError(error);
+  }
 };
 
 export const updateProductImageAction = async (
   prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
+  const file = formData.get("image") as File;
+  const oldUrl = formData.get("url") as string;
+  const id = formData.get("id") as string;
+
+  const validateFile = validateWithZodSchema(imageSchema, { image: file });
+  if (!validateFile) {
+    throw new Error("something went wrong");
+  }
+  console.log(formData);
+  deleteImage(oldUrl);
+  const newUrl = await uploadImage(validateFile.image);
+
+  await db.product.update({
+    where: {
+      id,
+    },
+    data: {
+      image: newUrl,
+    },
+  });
+
+  revalidatePath("/admin/products/" + id + "/edit");
   return { message: "product image updated" };
 };
+
+//

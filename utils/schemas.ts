@@ -3,31 +3,38 @@ import { z, ZodSchema } from "zod";
 export const productSchema = z.object({
   name: z
     .string()
-    .min(2, {
-      message: "name must be at least 2 characters.",
-    })
-    .max(100, {
-      message: "name must be less than 100 characters.",
-    }),
+    .min(2, { message: "name must be at least 2 characters." })
+    .max(100, { message: "name must be less than 100 characters." }),
   company: z.string(),
   featured: z.coerce.boolean(),
-  price: z.coerce.number().int().min(0, {
-    message: "price must be a positive number.",
-  }),
-  description: z.string().refine(
+  price: z.coerce.number().int().min(0, { message: "price must be a positive number." }),
+  // description: z.string().refine(
+  //   (description) => {
+  //     const wordCount = description.split(" ").length;
+  //     return wordCount >= 10 && wordCount <= 1000;
+  //   },
+  //   { message: "description must be between 10 and 1000 words." }
+  // ),
+  description: validateDescription(),
+});
+
+function validateDescription() {
+  return z.string().refine(
     (description) => {
+      console.log("description", description);
       const wordCount = description.split(" ").length;
       return wordCount >= 10 && wordCount <= 1000;
     },
-    {
-      message: "description must be between 10 and 1000 words.",
-    }
-  ),
-});
+    { message: "description must be between 10 and 1000 words." }
+  );
+}
+
 export const imageSchema = z.object({
   image: validateImageFile(),
 });
-
+//const validateFile = validateWithZodSchema(imageSchema, { image: file });
+//https://stackoverflow.com/questions/77802668/validate-image-input-works-unexpected-nextjs-server-actions-zod
+//https://dev.to/drprime01/how-to-validate-a-file-input-with-zod-5739
 function validateImageFile() {
   const maxUploadSize = 1024 * 1024;
   const acceptedFileTypes = ["image/"];
@@ -41,6 +48,7 @@ function validateImageFile() {
     }, "File must be an image");
 }
 
+// GENERIC                                productSchema, fields from formData
 export function validateWithZodSchema<T>(schema: ZodSchema<T>, data: unknown): T {
   const result = schema.safeParse(data);
   if (!result.success) {

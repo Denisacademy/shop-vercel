@@ -6,6 +6,7 @@ export const supabase = createClient(process.env.SUPABASE_URL as string, process
 
 // console.log(supabase);
 
+// API BUCKET
 export const uploadImage = async (image: File) => {
   const timestamp = Date.now();
   const newName = `${timestamp}-${image.name}`;

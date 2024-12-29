@@ -2,27 +2,28 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/", "/api/products(.*)", "/about"]);
-const isAdminRoute = createRouteMatcher(["/api/admin(.*)"]);
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+// const isAdminRoute = createRouteMatcher(["/api/admin(.*)"]);
 
 export default clerkMiddleware((auth, request) => {
-  const queryAdmin = request.nextUrl.searchParams.get("admin");
+  // const queryAdmin = request.nextUrl.searchParams.get("admin");
   const isAdminUser = auth().userId === process.env.ADMIN_USER_ID;
-  const apiAdminKey = process.env.ADMIN_USER_ID === queryAdmin;
+  //const apiAdminKey = process.env.ADMIN_USER_ID === queryAdmin;
 
   // console.log("clerkMiddleware", request.body);
-  if (apiAdminKey) {
-    console.log("apiAdminKey", "allProducts");
-    return NextResponse.next();
-  }
-  // console.log("no_admin", request.url);
+  // if (apiAdminKey) {
+  //   console.log("apiAdminKey", "allProducts");
+  //   return NextResponse.next();
+  // }
+  //              true      &&     true
   if (isAdminRoute(request) && !isAdminUser) {
-    // console.log("NO_ADMIN", request.url);
+    console.log("NO_ADMIN", request.url, isAdminUser);
     return NextResponse.redirect(new URL("/", request.url));
   }
   // console.log("isAdminUser", request.nextUrl.searchParams.get("admin"));
   // console.log("1");
   if (!isPublicRoute(request)) {
-    // console.log("ADMIN", request.url);
+    console.log("ADMIN", request.url);
     auth().protect();
   }
 });

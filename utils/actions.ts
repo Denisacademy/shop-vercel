@@ -212,3 +212,96 @@ export const updateProductImageAction = async (
     return renderError(error);
   }
 };
+
+export const fetchFavoriteId = async ({ productId, userId }: { productId: string; userId: string }) => {
+  const user = await getAuthUser();
+  // const user = await getAuthUser();
+  //not alwaus helps Restart your typescript server in VSCode CTRL + SHIFT + P then type: restart TS Server
+  // console.log(userId);
+  console.log(user);
+  // const clerkId = userId;
+  const favorite = await db.favorite.findFirst({
+    where: {
+      AND: [{ productId }, { clerkId: userId }],
+      // productId,
+      // clerkId: userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+  console.log("favorite", favorite);
+  return favorite?.id;
+};
+
+export const toggleFavoriteAction = async (prevState: any, formData: FormData) => {
+  const user = await getAuthUser();
+  // const rawData = Object.fromEntries(formData);
+  const productId = formData.get("productId") as string;
+  const favoriteId = formData.get("favoriteId") as string;
+  const urlName = formData.get("urlName") as string;
+
+  // console.log("ActionPrevState", prevState, [productId, favoriteId, urlName]);
+
+  if (favoriteId) {
+    await db.favorite.delete({
+      where: {
+        id: favoriteId,
+      },
+    });
+  } else {
+    await db.favorite.create({
+      data: {
+        clerkId: user.id,
+        productId,
+      },
+    });
+  }
+  revalidatePath(urlName); //pathname
+  return { message: favoriteId ? "delete favorite" : "add favorite" };
+};
+
+export const getUserFavoriteProducts = async () => {
+  const user = await getAuthUser();
+  const favorites = await db.favorite.findMany({
+    where: {
+      clerkId: user.id,
+    },
+    // JOIN TABLE
+    include: {
+      //product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+      product: true,
+    },
+  });
+  // revalidatePath("/favorites");
+  return favorites;
+};
+
+export const getFavoriteUsersProduct = async () => {
+  const current = "79d7695a-4b23-4c70-87d9-ddbacdcee82e";
+
+  const users = await db.favorite.findMany({
+    where: {
+      productId: current,
+    },
+    select: {
+      // product: true,
+      clerkId: true,
+    },
+  });
+
+  const product = await db.product.findFirst({
+    where: {
+      id: current,
+    },
+    select: {
+      name: true,
+      price: true,
+      company: true,
+    },
+  });
+
+  return { product, users };
+};
+
+// only my reviews in page and all reviews for one product

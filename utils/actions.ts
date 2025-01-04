@@ -305,3 +305,27 @@ export const getFavoriteUsersProduct = async () => {
 };
 
 // only my reviews in page and all reviews for one product
+
+export const createReviewAction = async (prevState: any, formData: FormData) => {
+  return { message: "review added" };
+};
+
+export const fetchProductReviews = async () => {
+  return { message: "get reviews" };
+};
+
+export const fetchProductReviewsByUser = async () => {
+  return { message: "get product reviews" };
+};
+
+export const deleteReviewAction = async () => {
+  return { message: "deleted review" };
+};
+
+export const findExistingReview = async () => {
+  return { message: "review exists" };
+};
+
+export const fetchProductRating = async () => {
+  return { message: "review exists" };
+};

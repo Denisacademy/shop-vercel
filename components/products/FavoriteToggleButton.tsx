@@ -15,7 +15,7 @@ async function FavoriteToggleButton({ productId }: { productId: string }) {
   const favoriteId = await fetchFavoriteId({ productId, userId });
 
   return (
-    <FavoriteToggleForm productId={productId} favoriteId={favoriteId}>
+    <FavoriteToggleForm productId={productId} favoriteId={favoriteId || ""}>
       {/* <Button  onClick={() => console.log("productId", productId)}
         size="icon"        variant="outline"      className="p-2 cursor-pointer"      >
         <FaHeart />
@@ -26,20 +26,20 @@ async function FavoriteToggleButton({ productId }: { productId: string }) {
 
 export default FavoriteToggleButton;
 
-async function FavoriteToggleBtn({ productId }: { productId: string }) {
-  const { userId } = auth();
+// async function FavoriteToggleBtn__({ productId }: { productId: string }) {
+//   const { userId } = auth();
 
-  if (!userId) return <CardSignInButton />;
+//   if (!userId) return <CardSignInButton />;
 
-  const favoriteId = await fetchFavoriteId({ productId, userId });
-  const action = toggleFavoriteAction;
-  return (
-    <FavoriteToggleForm favoriteId={"23"} productId={"22"}>
-      {/* IMPORT */}
-      <FormContainer action={action}>
-        {/* SPECIFY SUBMIT BTN ICON */}
-        <CardSubmitButton isFavorite={favoriteId ? true : false} />
-      </FormContainer>
-    </FavoriteToggleForm>
-  );
-}
+//   const favoriteId = await fetchFavoriteId({ productId, userId });
+//   const action = toggleFavoriteAction;
+//   return (
+//     <FavoriteToggleForm favoriteId={"23"} productId={"22"}>
+//       {/* IMPORT */}
+//       <FormContainer action={action}>
+//         {/* SPECIFY SUBMIT BTN ICON */}
+//         <CardSubmitButton isFavorite={favoriteId ? true : false} />
+//       </FormContainer>
+//     </FavoriteToggleForm>
+//   );
+// }

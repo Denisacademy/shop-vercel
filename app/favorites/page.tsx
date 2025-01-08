@@ -5,10 +5,10 @@ import { auth } from "@clerk/nextjs/server";
 
 async function FavoritesPage() {
   const favorites = await getUserFavoriteProducts();
-  const user = auth();
+  // const user = auth();
   // const favoritesUsers = await getFavoriteUsersProduct();
   // console.log(favorites);
-  console.log(user);
+  // console.log(user);
   // const {
   //   clerkId,
   //   product: { name, featured, price },

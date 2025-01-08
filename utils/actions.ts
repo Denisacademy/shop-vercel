@@ -5,7 +5,7 @@ import { currentUser } from "@clerk/nextjs/server";
 // import img5 from "../public/img5.jpeg";
 import img4 from "@/public/img4.jpeg";
 import { z, ZodSchema } from "zod";
-import { imageSchema, productSchema, validateWithZodSchema } from "./schemas";
+import { imageSchema, productSchema, reviewSchema, validateWithZodSchema } from "./schemas";
 import { deleteImage, supabase, uploadImage } from "./supabase";
 import { revalidatePath } from "next/cache";
 import prisma from "../utils/db";
@@ -218,7 +218,7 @@ export const fetchFavoriteId = async ({ productId, userId }: { productId: string
   // const user = await getAuthUser();
   //not alwaus helps Restart your typescript server in VSCode CTRL + SHIFT + P then type: restart TS Server
   // console.log(userId);
-  console.log(user);
+  // console.log(user);
   // const clerkId = userId;
   const favorite = await db.favorite.findFirst({
     where: {
@@ -230,7 +230,7 @@ export const fetchFavoriteId = async ({ productId, userId }: { productId: string
       id: true,
     },
   });
-  console.log("favorite", favorite);
+  // console.log("favorite", favorite);
   return favorite?.id;
 };
 
@@ -307,25 +307,117 @@ export const getFavoriteUsersProduct = async () => {
 // only my reviews in page and all reviews for one product
 
 export const createReviewAction = async (prevState: any, formData: FormData) => {
-  return { message: "review added" };
+  const user = await getAuthUser();
+  try {
+    const rawData = Object.fromEntries(formData);
+    const validatedFields = validateWithZodSchema(reviewSchema, rawData);
+
+    await db.review.create({
+      data: {
+        ...validatedFields,
+        clerkId: user.id,
+      },
+    });
+    revalidatePath(`/products/${validatedFields.productId}`);
+    return { message: "Review submitted successfully" };
+  } catch (error) {
+    return renderError(error);
+  }
 };
 
-export const fetchProductReviews = async () => {
-  return { message: "get reviews" };
+export const fetchProductReviews = async (productId: string) => {
+  const reviews = await db.review.findMany({
+    where: {
+      productId,
+    },
+    // select: {
+    //   rating: true,
+    //   comment: true,
+    //   authorName: true,
+    //   authorImageUrl: true,
+    // },
+  });
+  // console.log("findExistingReview", review);
+  // console.log("fetchProductReviews", reviews);
+  revalidatePath(`/products/${productId}`);
+  return reviews;
 };
 
 export const fetchProductReviewsByUser = async () => {
-  return { message: "get product reviews" };
+  const user = await getAuthUser();
+
+  const reviews = await db.review.findMany({
+    where: {
+      clerkId: user.id,
+    },
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      // no need as we use different image as in product[id] for review as on page reviews
+      // authorName: true,
+      // authorImageUrl: true,
+      product: {
+        select: {
+          image: true,
+          name: true,
+        },
+      },
+    },
+  });
+  return reviews;
 };
 
-export const deleteReviewAction = async () => {
+export const deleteReviewAction = async (productId: string) => {
+  console.log(productId); //clerkId
+  await db.review.delete({
+    where: {
+      id: productId,
+    },
+  });
+  revalidatePath("/reviews");
   return { message: "deleted review" };
 };
 
-export const findExistingReview = async () => {
-  return { message: "review exists" };
+export const findExistingReview = async (productId: string, userId: string) => {
+  try {
+    const review = await db.review.findFirst({
+      where: {
+        productId,
+        clerkId: userId,
+      },
+    });
+    revalidatePath(`/products/${productId}`);
+    return review;
+  } catch (error) {
+    renderError(error);
+  }
 };
 
-export const fetchProductRating = async () => {
-  return { message: "review exists" };
+export const fetchProductRating = async (productId: string) => {
+  //agrregate return {} grodupBY []
+  // [
+  //   {
+  //     _avg: { rating: 3.5 },
+  //     _count: { rating: 2 },
+  //     productId: '304f4d16-9574-4c36-a0f5-db8e94d6c081'
+  //   }
+  // ]
+  const result = await db.review.groupBy({
+    by: ["productId"],
+    _avg: {
+      rating: true,
+    },
+    _count: {
+      rating: true,
+    },
+    where: {
+      productId,
+    },
+  });
+  revalidatePath(`/products/${productId}`);
+  return {
+    rating: result[0]?._avg.rating?.toFixed(2) ?? 0,
+    count: result[0]?._count.rating ?? 0,
+  }; // return { message: "review exists" };
 };

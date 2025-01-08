@@ -37,7 +37,7 @@ export type actionType = "edit" | "delete";
 
 export const IconButton = ({ actionType }: { actionType: actionType }) => {
   const { pending } = useFormStatus();
-
+  // SWITCH FUNCTION
   const renderIcon = () => {
     switch (actionType) {
       case "edit":

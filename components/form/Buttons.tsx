@@ -59,11 +59,22 @@ export const IconButton = ({ actionType }: { actionType: actionType }) => {
   );
 };
 
+// CLERK NOT AUTH
 export const CardSignInButton = () => {
   return (
     <SignInButton mode="modal">
-      <Button type="button" size="icon" variant="outline" className="p-2 cursor-pointer" asChild>
+      <Button type="button" variant="outline" size="icon" asChild className="p-2 cursor-pointer capitalize">
         <FaRegHeart />
+      </Button>
+    </SignInButton>
+  );
+};
+
+export const ProductSignInButton = () => {
+  return (
+    <SignInButton mode="modal">
+      <Button type="button" className="p-2 cursor-pointer capitalize">
+        sign in
       </Button>
     </SignInButton>
   );

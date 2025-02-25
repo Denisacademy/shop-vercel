@@ -44,7 +44,8 @@ async function ProductAdmin() {
                 </TableCell>
                 <TableCell>{company}</TableCell>
                 <TableCell>{totalPrice}</TableCell>
-                <TableCell className="flex items-center gap-x-2">
+                {/* ACTIONS */}
+                <TableCell className="flex items-center gap-x-4">
                   {/* EDIT */}
                   <Link href={`/admin/products/${product.id}/edit`}>
                     <IconButton actionType="edit" />

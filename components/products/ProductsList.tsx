@@ -5,17 +5,14 @@ import Link from "next/link";
 import FavoriteToggleButton from "./FavoriteToggleButton";
 import { formatCurrency } from "@/utils/format";
 
-function ProductsList({
-  products,
-}: {
-  products: Product[];
-}) {
+function ProductsList({ products }: { products: Product[] }) {
   return (
     <div className="mt-12 grid gap-y-8">
       {products.map((product) => {
         const { price, image, name, company } = product;
         const dollarsAmount = formatCurrency(price);
         const { id: productId } = product;
+
         return (
           <article key={productId} className="relative">
             <Link href={`/products/${productId}`}>
@@ -33,16 +30,10 @@ function ProductsList({
                     />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold capitalize">
-                      {name}
-                    </h2>
-                    <h4 className="text-muted-foreground">
-                      {company}
-                    </h4>
+                    <h2 className="text-xl font-semibold capitalize">{name}</h2>
+                    <h4 className="text-muted-foreground">{company}</h4>
                   </div>
-                  <p className="text-muted-foreground text-lg md:ml-auto">
-                    {dollarsAmount}
-                  </p>
+                  <p className="text-primary font-bold text-lg md:ml-auto">{dollarsAmount}</p>
                 </CardContent>
               </Card>
             </Link>

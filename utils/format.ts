@@ -5,3 +5,11 @@ export const formatCurrency = (amount: number | null) => {
     currency: "USD",
   }).format(value);
 };
+
+export const formatdDate = (zone: string, createdAt: Date) => {
+  return new Date(createdAt).toLocaleDateString(zone, {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+};

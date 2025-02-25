@@ -1,14 +1,11 @@
 "use server";
 import { redirect } from "next/navigation";
-import db from "../utils/db";
-import { currentUser } from "@clerk/nextjs/server";
-// import img5 from "../public/img5.jpeg";
-import img4 from "@/public/img4.jpeg";
-import { z, ZodSchema } from "zod";
+import db from "@/utils/db";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { imageSchema, productSchema, reviewSchema, validateWithZodSchema } from "./schemas";
-import { deleteImage, supabase, uploadImage } from "./supabase";
+import { deleteImage, uploadImage } from "./supabase";
 import { revalidatePath } from "next/cache";
-import prisma from "../utils/db";
+
 // IT IS MORE EXPLICIT
 export const fetchFeaturedProducts = async () => {
   // await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -46,6 +43,7 @@ export const fetchProduct = async (productId: string) => {
   const product = await db.product.findUnique({
     where: { id: productId },
   });
+  // console.log("fetchProduct", product);
 
   if (!product) {
     redirect("/products");
@@ -197,7 +195,7 @@ export const updateProductImageAction = async (
     if (!validateFile) {
       throw new Error("something went wrong");
     }
-    console.log(formData);
+    // console.log(formData);
     deleteImage(oldUrl);
     const newUrl = await uploadImage(validateFile.image);
 
@@ -273,6 +271,7 @@ export const getUserFavoriteProducts = async () => {
       product: true,
     },
   });
+  console.log(favorites);
   // revalidatePath("/favorites");
   return favorites;
 };
@@ -354,9 +353,6 @@ export const fetchProductReviewsByUser = async () => {
       id: true,
       rating: true,
       comment: true,
-      // no need as we use different image as in product[id] for review as on page reviews
-      // authorName: true,
-      // authorImageUrl: true,
       product: {
         select: {
           image: true,
@@ -365,11 +361,34 @@ export const fetchProductReviewsByUser = async () => {
       },
     },
   });
+  // revalidatePath("/reviews");
+  // select: {
+  //   id: true,
+  //   rating: true,
+  //   comment: true,
+  // no need as we use different image as in product[id] for review as on page reviews
+  // authorName: true,
+  // authorImageUrl: true,
+  // product: {
+  //   select: {
+  //     image: true,
+  //     name: true,
+  //   },
+  // },
+  //   product: {
+  //     select: {
+  //       image: true,
+  //       name: true,
+  //     },
+  //   },
+  // },
+
+  // console.log("actions", reviews);
   return reviews;
 };
 
 export const deleteReviewAction = async (productId: string) => {
-  console.log(productId); //clerkId
+  // console.log(productId); //clerkId
   await db.review.delete({
     where: {
       id: productId,
@@ -420,4 +439,307 @@ export const fetchProductRating = async (productId: string) => {
     rating: result[0]?._avg.rating?.toFixed(2) ?? 0,
     count: result[0]?._count.rating ?? 0,
   }; // return { message: "review exists" };
+};
+
+export const changeAmountAction = async (amount: string) => {
+  console.log("changeAmount");
+  return { message: "change ammount" };
+};
+
+export const calculateTotal = async () => {
+  const items = await db.product.aggregate({
+    _sum: {
+      price: true,
+    },
+    _count: {
+      id: true,
+    },
+  });
+
+  const shipping = 5;
+  const subTotal = items._sum.price ?? 0;
+  const tax = (subTotal * 10) / 100;
+
+  const result = {
+    subTotal: items._sum.price,
+    tax,
+    orderTotal: subTotal + tax + shipping,
+    shipping,
+  };
+
+  // console.log("calculateTotal", result);
+  return result;
+  return { message: "caclulated" };
+};
+
+// const isProductExistInCard = async() => {
+//   const user = await getAuthUser();
+//     return await db.cart.findFirst({
+//       clerkId: user.id,
+
+//     })
+// }
+
+const updateCartItem = async (cartItemId: string, amount: number) => {
+  // console.log("updateCart");
+  await db.cartItem.update({
+    where: {
+      id: cartItemId,
+    },
+    data: { amount },
+  });
+  // revalidatePath("/cart");
+  // console.log({ message: "product updated" });
+};
+
+const createCartItemOrUpdateCartItem = async (cartId: string, productId: string, amount: number) => {
+  let cartItem = await db.cartItem.findFirst({
+    where: {
+      productId,
+      cartId,
+    },
+  });
+
+  if (!cartItem) await db.cartItem.create({ data: { cartId, productId, amount } });
+  else await updateCartItem(cartItem.id, cartItem.amount + amount);
+
+  return cartItem;
+};
+
+export const fetchCart = async (userId: string) => {
+  // console.log("fetchCart", userId);
+  return await db.cart.findFirst({
+    where: { clerkId: userId },
+    include: {
+      cartItems: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
+};
+
+export const fetchCartItems = async () => {
+  // NOT HAVING REDIRECT
+  const { userId } = auth();
+
+  const items = await db.cart.findFirst({
+    where: { clerkId: userId ?? "" },
+    select: {
+      numItemsInCart: true,
+    },
+  });
+  return items?.numItemsInCart ?? 0;
+};
+
+const fetchOrCreateCart = async (cartId: string) => {
+  const user = await getAuthUser();
+  let cart = await fetchCart(cartId);
+
+  if (!cart) {
+    cart = await db.cart.create({
+      data: { clerkId: user.id },
+      include: {
+        cartItems: {
+          include: { product: true },
+        },
+      },
+    });
+  }
+
+  return cart;
+};
+
+export const updateCart = async (cartId: string) => {
+  let cart = await fetchCart(cartId);
+
+  if (cart) {
+    const cartItems = cart.cartItems;
+    const { numItemsInCart, cartTotal } = cartItems.reduce(
+      (acc, item) => {
+        acc.numItemsInCart += item.amount;
+        acc.cartTotal += item.amount * item.product.price;
+        return acc;
+      },
+      {
+        numItemsInCart: 0,
+        cartTotal: 0,
+      }
+    );
+    const tax = cart.taxRate * cartTotal;
+    const updatedCart = await db.cart.update({
+      where: { id: cart.id },
+      data: {
+        numItemsInCart,
+        cartTotal,
+        tax,
+        orderTotal: cartTotal + tax,
+      },
+    });
+
+    return { cartItems, updatedCart };
+  }
+};
+
+export const addToCart = async (prevState: any, formData: FormData) => {
+  const user = await getAuthUser();
+  const amount = Number(formData.get("amount"));
+  const productId = formData.get("productId") as string;
+  //1st case
+  //check there is cart
+  //is not createCart
+  // createCartItem
+
+  //2nd
+  //add the same and new item
+  //check cart
+  //if is check if there is cartItem in cart
+  //if is then find cartItem and update
+
+  try {
+    let cart = await fetchOrCreateCart(user.id);
+    await createCartItemOrUpdateCartItem(cart.id, productId, amount);
+    //UPDATECART
+    await updateCart(user.id);
+    // revalidatePath("/cart");
+
+    // return { message: "product added" };
+  } catch (error) {
+    return renderError(error);
+  }
+  redirect("/cart");
+};
+
+export const fetchOrdersByUser = async () => {
+  const user = await getAuthUser();
+  // console.log("fetchOrdersByUser", user.id);
+  return await db.order.findMany({
+    where: {
+      clerkId: user.id,
+    },
+  });
+};
+
+export const fetchSingleOrder = async (orderId: string) => {
+  return await db.order.findFirst({
+    where: {
+      id: orderId,
+    },
+  });
+};
+
+export const fetchSingleOrderDetails = async (orderId: string) => {
+  // try {
+  const order = await fetchSingleOrder(orderId);
+  // console.log("fetchSingleOrder", order);
+  if (order) {
+    const items = await db.orderDetails.findMany({
+      where: {
+        orderId,
+      },
+      include: {
+        items: true,
+        // {
+        //   select: {
+        //     id: true,
+        //     name: true,
+        //     company: true,
+        //     price: true,
+        //     image: true,
+        //   },
+        // },
+      },
+    });
+    return { items: items.map((item) => item.items), createdAt: order.createdAt, orderId: order.id };
+  }
+  // }
+  // catch (error) {
+  // return renderError(error);
+  // }
+};
+
+//https://stackoverflow.com/questions/25159330/how-to-convert-an-iso-date-to-the-date-format-yyyy-mm-dd
+export const orderDetails = async (userId: string) => {
+  // const user = await getAuthUser();
+  // console.log(userId);
+  const order = await db.order.findFirst({
+    where: {
+      clerkId: userId,
+    },
+  });
+
+  const items = await db.orderDetails.findMany({
+    where: {
+      clerkId: userId,
+    },
+
+    include: {
+      items: true,
+    },
+  });
+
+  if (order) {
+    const { id: orderId, products, createdAt, orderTotal, isPaid } = order;
+    const formatedDate = new Date(createdAt).toLocaleDateString("ru-RU", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    });
+    return {
+      orderId,
+      createdAt: formatedDate,
+      // products,
+      isPaid,
+      orderTotal,
+      items: items.map((item) => item.items),
+    };
+  }
+};
+// select: {
+//   id: true,
+//   rating: true,
+//   comment: true,
+//   product: {
+//     select: {
+//       image: true,
+//       name: true,
+//     },
+//   },
+// },
+
+export const placeOrderAction = async () => {
+  const user = await getAuthUser();
+
+  const cart = await fetchOrCreateCart(user.id);
+
+  const cartItems = await db.cartItem.findMany({
+    where: {
+      cartId: cart.id,
+    },
+    select: {
+      productId: true,
+    },
+  });
+
+  const { clerkId, numItemsInCart, orderTotal, tax, shipping, id } = cart;
+
+  await db.order.create({
+    data: {
+      clerkId: clerkId,
+      products: numItemsInCart,
+      orderTotal: orderTotal,
+      tax: tax,
+      shipping: shipping,
+      email: "test@mail.com",
+      isPaid: true,
+      ordersDetails: {
+        create: cartItems.map((item) => ({ ...item, clerkId: user.id })),
+      },
+    },
+  });
+
+  await db.cart.delete({ where: { id } });
+
+  redirect("/");
 };

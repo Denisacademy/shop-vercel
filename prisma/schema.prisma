@@ -1,7 +1,7 @@
 datasource db {
-  provider         = "postgresql"
-  url              = env("DATABASE_URL")
-  directUrl        = env("DIRECT_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
 }
 
 generator client {
@@ -10,33 +10,33 @@ generator client {
 
 model Product {
   id           String     @id @default(uuid())
-  name         String
-  company      String
-  description  String
-  featured     Boolean
-  image        String
-  price        Int
+  name        String
+  company     String
+  description String
+  featured   Boolean
+  image       String
+  price       Int
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  clerkId      String
-
+  clerkId  String
   favorites Favorite[]
-  reviews Review[]
+  reviews Review []
+  cartItems CartItem[]
+  payedByUser orderDetails[]
 }
-
 
 model Favorite {
   id        String   @id @default(uuid())
+  clerkId  String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  clerkId   String
 }
-//prosduct is one by id but has a lot of reviews
+
 model Review {
-  id String @id @default(uuid())
-  clerkId   String
+  id       String   @id @default(uuid())
+  clerkId  String
   rating Int
   comment String
   authorName String
@@ -45,4 +45,63 @@ model Review {
   updatedAt DateTime @updatedAt
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
+}
+
+
+model Cart {
+  id        String   @id @default(uuid())
+  clerkId  String
+  cartItems CartItem[]
+  numItemsInCart Int @default(0)
+  cartTotal Int @default(0)
+  shipping Int @default(5)
+  tax Int @default(0)
+  taxRate Float @default(0.1)
+  orderTotal Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  
+  cart     Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId   String
+  
+  amount  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Order {
+  id        String   @id @default(uuid())
+  clerkId  String
+  products Int  @default(0)
+  orderTotal Int @default(0)
+  tax Int @default(0)
+  shipping Int @default(0)
+  email String
+  isPaid Boolean @default(false)
+  ordersDetails orderDetails[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model orderDetails {
+  id String @id @default(uuid())
+  clerkId String
+  
+  productId String
+  items  Product @relation(fields: [productId], references: [id])
+  
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

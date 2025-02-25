@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { formatCurrency } from "@/utils/format";
-import { fetchProduct, findExistingReview } from "@/utils/actions";
+import { createCartOrUpdateAction, fetchProduct, findExistingReview } from "@/utils/actions";
 
 import BreadCrumbs from "@/components/single-product/BreadCrumbs";
 import FavoriteToggleButton from "@/components/products/FavoriteToggleButton";
@@ -9,9 +9,12 @@ import ProductRating from "@/components/single-product/ProductRating";
 import SubmitReview from "@/components/reviews/SubmitReview";
 import ProductReviews from "@/components/reviews/ProductReviews";
 import { auth } from "@clerk/nextjs/server";
+import { CardSignInButton } from "@/components/form/Buttons";
 
 async function ProductPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
+  // console.log("ProductPage", params.id);
+  // await createCartOrUpdateAction(params.id);
   const product = await fetchProduct(params.id);
   const { image, price, name, company, description } = product;
 
@@ -21,7 +24,6 @@ async function ProductPage(props: { params: Promise<{ id: string }> }) {
   const { userId } = auth();
 
   const reviewDoesNotExist = userId && !(await findExistingReview(params.id, userId));
-
   return (
     <section>
       <BreadCrumbs name={name} />
@@ -31,7 +33,7 @@ async function ProductPage(props: { params: Promise<{ id: string }> }) {
             fill
             src={image}
             alt={name}
-            unoptimized
+            // unoptimized
             priority
             sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
             className="w-full rounded-md object-cover"
@@ -46,7 +48,7 @@ async function ProductPage(props: { params: Promise<{ id: string }> }) {
           <p className="text-xl mt-2">{company}</p>
           <p className="mt-3 rounded-md p-2 text-md bg-muted inline-block">{total}</p>
           <p className="mt-6 leading-8 text-muted-foreground">{description}</p>
-
+          {/* <CardSignInButton /> */}
           <AddToCart productId={productId} />
         </div>
       </div>

@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "../ui/label";
-import { createCartOrUpdateAction } from "@/utils/actions";
+// import { createCartOrUpdateAction } from "@/utils/actions";
 
 export function RatingInput({ name, labelText }: { name: string; labelText?: string }) {
   const numbers = Array.from({ length: 5 }, (_, index) => {
@@ -51,7 +51,7 @@ RatingInputAmountType) {
   console.log(amount);
   return (
     <Select
-      onValueChange={createCartOrUpdateAction}
+      // onValueChange={createCartOrUpdateAction}
       defaultValue={amount?.toString() || numbers[0]}
       name={name}
       required

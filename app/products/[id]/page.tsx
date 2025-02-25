@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { formatCurrency } from "@/utils/format";
-import { createCartOrUpdateAction, fetchProduct, findExistingReview } from "@/utils/actions";
+import { fetchProduct, findExistingReview } from "@/utils/actions";
 
 import BreadCrumbs from "@/components/single-product/BreadCrumbs";
 import FavoriteToggleButton from "@/components/products/FavoriteToggleButton";

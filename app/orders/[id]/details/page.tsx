@@ -1,6 +1,7 @@
 import { fetchSingleOrderDetails } from "@/utils/actions";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { SlActionUndo } from "react-icons/sl";
 
 import SectionTitle from "@/components/global/SectionTitle";
 
@@ -10,6 +11,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 async function OrderDetails({ params }: { params: { id: string } }) {
   const { userId } = auth();
@@ -18,15 +20,21 @@ async function OrderDetails({ params }: { params: { id: string } }) {
 
   if (!order) return <SectionTitle text="order not found" />;
   const { orderId, items, createdAt } = order;
-  console.log("OrderDetails", order);
+  // console.log("OrderDetails", order);
 
   const formatedDate = formatdDate("ru-Ru", createdAt);
 
   return (
     <div>
       <div className="flex justify-between mb-4 p-5 rounded-lg items-center border border-secondary">
-        <h2 className="text-2xl">ID: {orderId.slice(-5)}</h2>
-        <h3 className="capitalize px-4 py-2 text-md text-foreground rounded-sm">from {formatedDate}</h3>
+        <h2 className="text-2xl">
+          <Link className="font-bold  text-primary" href="/orders">
+            <SlActionUndo>ID: {orderId.slice(-5)}</SlActionUndo>
+          </Link>
+        </h2>
+        <h3 className="capitalize px-4 py-2 text-md font-bold text-foreground rounded-sm">
+          orderd id: {orderId.slice(-5)} {formatedDate}
+        </h3>
         <button
           className="hover:bg-secondary hover:text-muted-foreground border px-6 py-2 rounded-full"
           // href={`orders/${id}/details`}
@@ -34,7 +42,7 @@ async function OrderDetails({ params }: { params: { id: string } }) {
           hide details
         </button>
       </div>
-      <h2 className="text-3xl font-medium tracking-wider capitalize mb-4">your cart</h2>
+      {/* <h2 className="text-3xl font-medium tracking-wider capitalize mb-4">your cart</h2> */}
       {/* <ProductsList products={items} /> */}
       <div className="mt-4">
         {items.map((item) => {

@@ -6,6 +6,7 @@ import { Separator } from "../ui/separator";
 import { Cart } from "@prisma/client";
 import { formatCurrency } from "@/utils/format";
 import PlaceOrder from "./PlaceOrder";
+import SubmitButton from "../form/Buttons";
 
 async function CartTotal({ cart }: { cart: Cart }) {
   const { orderTotal, tax, shipping, cartTotal } = cart;
@@ -33,10 +34,11 @@ async function CartTotal({ cart }: { cart: Cart }) {
         </p>
       </Card>
 
-      {/* <FormContainer action={placeOrderAction}>
-        <Button className="w-full">Place Order</Button>
-      </FormContainer> */}
-      <PlaceOrder />
+      <FormContainer action={placeOrderAction}>
+        {/* <Button className="w-full">Place Order</Button> */}
+        <SubmitButton className="w-full" text="Place Order"></SubmitButton>
+      </FormContainer>
+      {/* <PlaceOrder /> */}
     </div>
   );
 }

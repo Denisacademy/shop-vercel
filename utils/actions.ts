@@ -1,10 +1,12 @@
 "use server";
 import { redirect } from "next/navigation";
 import db from "@/utils/db";
+import { Prisma } from "@prisma/client";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { imageSchema, productSchema, reviewSchema, validateWithZodSchema } from "./schemas";
 import { deleteImage, uploadImage } from "./supabase";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 // IT IS MORE EXPLICIT
 export const fetchFeaturedProducts = async () => {
@@ -24,22 +26,27 @@ export const fetchFeaturedProducts = async () => {
   return products;
 };
 
+type Product = Prisma.ProductGetPayload<{}>;
+
 // ANOTHER APPROACH
-export const fetchAllProducts = ({ search = "" }: { search: string }) => {
-  return db.product.findMany({
+export const fetchAllProducts = async ({ search = "" }: { search: string }): Promise<Product[]> => {
+  // export const fetchAllProducts = async ({ search = "" }: { search: string }): Promise<Product[]> => {
+  return await db.product.findMany({
     where: {
       OR: [
         { name: { startsWith: search, mode: "insensitive" } },
         { company: { startsWith: search, mode: "insensitive" } },
       ],
     },
+
     orderBy: {
       createdAt: "desc",
     },
   });
+  // return products
 };
 
-export const fetchProduct = async (productId: string) => {
+export const fetchProduct = async (productId: string): Promise<Product> => {
   const product = await db.product.findUnique({
     where: { id: productId },
   });
@@ -506,18 +513,55 @@ const createCartItemOrUpdateCartItem = async (cartId: string, productId: string,
   return cartItem;
 };
 
-export const fetchCart = async (userId: string) => {
+// type includeCartClause = { include: { cartItems: { include: { product: true } } } };
+const includeCartClause = { include: { cartItems: { include: { product: true } } } } as const;
+// type CartType<T extends Prisma.CartInclude> = Prisma.CartGetPayload<{ include: T }>;
+type CartWithItems = Prisma.CartGetPayload<typeof includeCartClause>;
+
+export const fetchCart = async (userId: string): Promise<CartWithItems | null> => {
   // console.log("fetchCart", userId);
-  return await db.cart.findFirst({
-    where: { clerkId: userId },
-    include: {
-      cartItems: {
-        include: {
-          product: true,
+  const itemInCart: CartWithItems = {
+    id: "1",
+    clerkId: "2",
+    numItemsInCart: 3,
+    cartTotal: 10,
+    shipping: 5,
+    tax: 0.1,
+    taxRate: 10,
+    orderTotal: 100,
+    createdAt: new Date("2025-02-08T15:04:51.577Z"),
+    updatedAt: new Date("2025-02-08T15:04:51.577Z"),
+
+    cartItems: [
+      {
+        id: "122",
+        productId: "122",
+        cartId: "1221",
+        amount: 1,
+        createdAt: new Date("2025-02-08T15:04:51.577Z"),
+        updatedAt: new Date("2025-02-08T15:04:51.577Z"),
+
+        product: {
+          id: "18371ffd-d2a8-4b4f-be6b-8c5bbf45a6a1",
+          name: "",
+          company: "ikea",
+          description: "",
+          featured: true,
+          image: "",
+          price: 100,
+          createdAt: new Date("2025-02-08T15:04:51.577Z"),
+          updatedAt: new Date("2025-02-08T15:04:51.577Z"),
+          clerkId: "1",
         },
       },
-    },
+    ],
+  };
+  const result = await db.cart.findFirst({
+    where: { clerkId: userId },
+    ...includeCartClause,
   });
+  // console.log("itemInCart", { result, items: result?.cartItems[0] });
+  return result;
 };
 
 export const fetchCartItems = async () => {
@@ -533,25 +577,40 @@ export const fetchCartItems = async () => {
   return items?.numItemsInCart ?? 0;
 };
 
-const fetchOrCreateCart = async (cartId: string) => {
+//const includeCartClause = { include: { cartItems: { include: { product: true } } } } as const;
+
+export const fetchOrCreateCart = async (cartId: string) => {
   const user = await getAuthUser();
   let cart = await fetchCart(cartId);
+  console.log(`"fetchOrCreateCart"`, cart);
 
   if (!cart) {
     cart = await db.cart.create({
       data: { clerkId: user.id },
-      include: {
-        cartItems: {
-          include: { product: true },
-        },
-      },
+      ...includeCartClause,
     });
   }
-
   return cart;
 };
 
-export const updateCart = async (cartId: string) => {
+// type CartItems
+
+type CartItemType = {
+  id: string;
+  productId: string;
+  cartId: string;
+  amount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  product: Product;
+};
+
+type UpdateCartReturnType = {
+  updatedCart: Prisma.CartGetPayload<{}>;
+  cartItems: CartItemType[];
+};
+
+export const updateCart = async (cartId: string): Promise<UpdateCartReturnType | null | undefined> => {
   let cart = await fetchCart(cartId);
 
   if (cart) {
@@ -599,9 +658,12 @@ export const addToCart = async (prevState: any, formData: FormData) => {
 
   try {
     let cart = await fetchOrCreateCart(user.id);
+    console.log("cart");
     await createCartItemOrUpdateCartItem(cart.id, productId, amount);
+    console.log("createOrUpdateCartItem");
     //UPDATECART
     await updateCart(user.id);
+    console.log("updateCart");
     // revalidatePath("/cart");
 
     // return { message: "product added" };
@@ -611,12 +673,38 @@ export const addToCart = async (prevState: any, formData: FormData) => {
   redirect("/cart");
 };
 
-export const fetchOrdersByUser = async () => {
+type Order = Prisma.OrderGetPayload<{}>;
+
+export type SortField = "createdAt" | "orderTotal" | undefined | string;
+export type SortOrder = "asc" | "desc";
+
+export type searchParams = {
+  [key: string]: SortField;
+  // sortOrder: SortOrder;
+};
+export const sortFieldAndOrderBY = async (searchParams: searchParams) => {
+  const fields = ["createdAt", "orderBy"];
+  // console.log(searchParams.sortValue);
+  // const {id: userId} = await  getAuthUser()
+  const orders = await db.order.findMany({
+    // where: {
+    //   clerkId
+    // },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export const fetchOrdersByUser = async (sortField = "orderTotal", sortOrder = "desc"): Promise<Order[]> => {
   const user = await getAuthUser();
-  // console.log("fetchOrdersByUser", user.id);
+
   return await db.order.findMany({
     where: {
       clerkId: user.id,
+    },
+    orderBy: {
+      [sortField]: sortOrder,
     },
   });
 };
@@ -696,19 +784,10 @@ export const orderDetails = async (userId: string) => {
     };
   }
 };
-// select: {
-//   id: true,
-//   rating: true,
-//   comment: true,
-//   product: {
-//     select: {
-//       image: true,
-//       name: true,
-//     },
-//   },
-// },
 
 export const placeOrderAction = async () => {
+  const origin = headers().get("origin");
+  console.log("origin", origin);
   const user = await getAuthUser();
 
   const cart = await fetchOrCreateCart(user.id);
@@ -724,22 +803,24 @@ export const placeOrderAction = async () => {
 
   const { clerkId, numItemsInCart, orderTotal, tax, shipping, id } = cart;
 
-  await db.order.create({
-    data: {
-      clerkId: clerkId,
-      products: numItemsInCart,
-      orderTotal: orderTotal,
-      tax: tax,
-      shipping: shipping,
-      email: "test@mail.com",
-      isPaid: true,
-      ordersDetails: {
-        create: cartItems.map((item) => ({ ...item, clerkId: user.id })),
-      },
-    },
-  });
+  // await db.order.create({
+  //   data: {
+  //     clerkId: clerkId,
+  //     products: numItemsInCart,
+  //     orderTotal: orderTotal,
+  //     tax: tax,
+  //     shipping: shipping,
+  //     email: "test@mail.com",
+  //     isPaid: true,
+  //     ordersDetails: {
+  //       create: cartItems.map((item) => ({ ...item, clerkId: user.id })),
+  //     },
+  //   },
+  // });
 
-  await db.cart.delete({ where: { id } });
+  // await db.cart.delete({ where: { id } });
 
-  redirect("/");
+  redirect(`${origin}/checkout?cartId=${cart.id}`);
 };
+
+// SORTBY FIELD AND ORDER

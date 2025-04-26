@@ -17,23 +17,23 @@ function ProductsList({ products }: { products: Product[] }) {
           <article key={productId} className="relative">
             <Link href={`/products/${productId}`}>
               <Card>
-                <CardContent className="p-8 gap-y-4 grid grid-cols-3">
-                  <div className="relative h-64  md:h-48 md:w-48">
+                <CardContent className="p-8 gap-y-4 grid grid-cols-3 sm:grid-cols-3 sm:gap-x-4">
+                  <div className="relative h-64 md:h-48 sm:h-32 md:w-48">
                     <Image
                       src={image}
                       alt={name}
                       fill
                       sizes="(max-width:768px) 100vw,(max-width:1200px) 50vw,33vw"
                       priority
-                      className="w-full rounded-md object-cover"
+                      className="sm:object-contain w-full rounded-md lg:object-cover"
                       unoptimized
                     />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold capitalize">{name}</h2>
-                    <h4 className="text-muted-foreground">{company}</h4>
+                    <h2 className="lg:text-xl text-base font-semibold capitalize">{name}</h2>
+                    <h4 className="sm:text-sm text-muted-foreground">{company}</h4>
                   </div>
-                  <p className="text-primary font-bold text-lg md:ml-auto">{dollarsAmount}</p>
+                  <p className="text-primary font-bold text-lg sm:ml-auto md:ml-auto">{dollarsAmount}</p>
                 </CardContent>
               </Card>
             </Link>

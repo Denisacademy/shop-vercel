@@ -9,8 +9,10 @@ import FormContainer from "../../components/form/FormContainer";
 
 async function Cart() {
   const { userId } = auth();
+  // null -> redirect
   if (!userId) redirect("/");
 
+  //fetchCart
   const cart = await updateCart(userId);
   if (!cart) return <SectionTitle text="Empty Cart" />;
 

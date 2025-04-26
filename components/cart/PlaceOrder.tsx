@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
+import { Button } from "../ui/button";
 
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.
@@ -23,36 +24,10 @@ export default function PlaceOrder() {
   return (
     <form action="/api/checkout_sessions" method="POST">
       <section>
-        <button type="submit" role="link">
+        <Button type="submit" role="link">
           Place Order
-        </button>
+        </Button>
       </section>
-      <style jsx>
-        {`
-          section {
-            background: "#ffffff";
-            display: flex;
-            flex-direction: column;
-
-            border-radius: 6px;
-            justify-content: space-between;
-          }
-          button {
-            height: 36px;
-            background: #556cd6;
-            border-radius: 4px;
-            color: ;
-            border: 0;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0px 4px 5.5px 0px rgba(0, 0, 0, 0.07);
-          }
-          button:hover {
-            opacity: 0.8;
-          }
-        `}
-      </style>
     </form>
   );
 }

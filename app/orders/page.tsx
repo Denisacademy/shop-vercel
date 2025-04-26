@@ -1,18 +1,72 @@
 import SectionTitle from "@/components/global/SectionTitle";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { fetchOrdersByUser } from "@/utils/actions";
+import { fetchOrdersByUser, searchParams, SortField, SortOrder } from "@/utils/actions";
 import { formatCurrency, formatdDate } from "@/utils/format";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+// {sortPrice='asc'}
 
-async function OrdersPage() {
-  const orders = await fetchOrdersByUser();
+import { GoTriangleUp, GoTriangleDown } from "react-icons/go";
+//total up  tas up tax down total up
+async function OrdersPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ params: string }>;
+  searchParams: Promise<{ [key: string]: string }>;
+}) {
+  const paramsField = await searchParams;
+
+  const sortField = paramsField.sortField === undefined ? "orderTotal" : paramsField.sortField;
+  const sortOrder = paramsField.orderBy === undefined || paramsField.orderBy === "asc" ? "desc" : "asc";
+
+  const orders = await fetchOrdersByUser(sortField, sortOrder);
+
+  const SortLink = ({ value }: { value: string }) => {
+    const isActive = sortField === value ? "text-green-600 font-medium" : "";
+
+    return (
+      <>
+        <Link
+          className={`${isActive && sortOrder ? isActive : ""} flex items-center `}
+          href={`/orders?sortField=${value}&orderBy=${sortOrder && isActive ? sortOrder : "asc"}`}
+        >
+          {value}
+          {sortField === value ? (
+            sortOrder === "asc" ? (
+              <GoTriangleUp className="size-5" />
+            ) : (
+              <GoTriangleDown className="size-5" />
+            )
+          ) : (
+            ""
+          )}
+        </Link>
+      </>
+    );
+  };
+
   if (!orders) redirect("/");
 
   return (
     <>
-      <h2 className="text-3xl font-medium tracking-wider capitalize mb-8">your orders history</h2>
+      <div className="flex justify-around items-center mb-8 p-2 bg-secondary">
+        <h2 className="text-3xl font-medium tracking-wider capitalize text-primary">your orders history</h2>
+
+        <div className="inline-flex items-center gap-3">
+          <span className="font-medium">sort by:</span>
+          <SortLink value="createdAt" />
+          <SortLink value="orderTotal" />
+          {/* <h3>
+            {sortOrder === "asc" ? (
+              <GoTriangleUp className="size-8" />
+            ) : (
+              <GoTriangleDown className="size-8" />
+            )}
+          </h3> */}
+        </div>
+      </div>
 
       <Card>
         {orders.map((order) => {

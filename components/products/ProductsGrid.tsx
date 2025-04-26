@@ -24,14 +24,14 @@ function ProductsGrid({ products }: { products: Product[] }) {
                               duration-500"
               >
                 <CardContent className="p-4">
-                  <div className="relative h-64 md:h-48 rounded overflow-hidden">
+                  <div className="relative h-64  rounded overflow-hidden">
                     <Image
                       src={image}
                       alt={name}
                       fill
                       sizes="(max-width:768px) 100vw,(max-width:1200px) 50vw, 33vw"
                       priority
-                      className="rounded w-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                      className="rounded w-full object-cover  transform group-hover:scale-110 transition-transform duration-500"
                       // unoptimized
                     />
                   </div>

@@ -52,6 +52,7 @@ function validateImageFile() {
 export function validateWithZodSchema<T>(schema: ZodSchema<T>, data: unknown): T {
   const result = schema.safeParse(data);
   if (!result.success) {
+    console.log("img_error");
     const errors = result.error.errors.map((error) => error.message);
     throw new Error(errors.join(","));
   }

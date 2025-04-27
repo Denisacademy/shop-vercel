@@ -5,6 +5,23 @@ import Navbar from "@/components/navbar/Navbar";
 import Container from "@/components/global/Container";
 import Providers from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
+// import img1 from "./../public/img1.jpeg";.
+import ins from "@/public/ins.jpg";
+import tw from "@/public/tw.jpg";
+import img6 from "@/public/img6.jpg";
+import img13 from "@/public/img13.jpg";
+import img12 from "@/public/img12.jpg";
+import img8 from "@/public/img8.jpg";
+// import img6 from "@/public/img6.jpeg";
+import { BiLogoFacebook } from "react-icons/bi";
+import { FaInstagram } from "react-icons/fa6";
+import { IoLogoTwitter } from "react-icons/io5";
+
+import { VscCode } from "react-icons/vsc";
+import { BsTelephoneForward } from "react-icons/bs";
+import { SlLocationPin } from "react-icons/sl";
+import { MdOutlineMailOutline } from "react-icons/md";
+import Logo from "@/components/navbar/Logo";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -58,14 +75,118 @@ export default function RootLayout({
           <Providers>
             <Navbar />
             <Container className="py-20">{children}</Container>
+            {/* FOOTER bg-orange-400*/}
+            <footer className="shadow-[1px_2px_6px_rgba(0,0,0,0.2)]">
+              {/* box-shadow: 1px 2px 6px rgba(0,0,0,0.2); */}
+
+              <div className="bg-card py-8 text-muted-foreground">
+                <Container className="my-16 grid justify-between lg:grid-cols-7 gap-12 xl:max-w-7xl md:grid-cols-2">
+                  <div className=" lg:col-span-2">
+                    <div className="footer__logo mb-8 text-2xl font-medium">
+                      {/* <a href="#">TravelToor</a> */}
+                      <a
+                        className="rounded-md flex gap-2 items-center bg-primary w-min px-2 py-1 text-secondary"
+                        href="/"
+                      >
+                        Shop
+                        <VscCode className="w-8 h-8" />
+                      </a>
+                    </div>
+                    <p className="text-md mb-6">
+                      Explore the world with us! Connect through our social media channels, find quick links
+                      to essential resources, and access 24/7 support to make your travel planning effortless.
+                    </p>
+                    <ul className="footer__socials flex gap-2 text-background">
+                      <li className="p-2 rounded-full bg-slate-400 ">
+                        <a href="#">
+                          <BiLogoFacebook fontSize={18} />
+                        </a>
+                      </li>
+                      <li className="p-2 rounded-full  bg-slate-400">
+                        <a href="#">
+                          <IoLogoTwitter fontSize={18} />
+                        </a>
+                      </li>
+                      <li className="p-2 rounded-full  bg-slate-400">
+                        <a href="#">
+                          <FaInstagram fontSize={18} />
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="">
+                    <h4 className="mb-8 font-medium text-2xl">Services</h4>
+                    <ul className="footer__links flex md:flex-col gap-4">
+                      <li>
+                        <a href="#">About Us</a>
+                      </li>
+                      <li>
+                        <a href="#">Destinations</a>
+                      </li>
+                      <li>
+                        <a href="#">Services</a>
+                      </li>
+                      <li>
+                        <a href="#">Contact</a>
+                      </li>
+                      <li>
+                        <a href="#">Privacy</a>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className=" lg:col-span-2">
+                    <h4 className="mb-8 font-medium text-2xl">Instagram</h4>
+                    <div className="md:grid flex flex-wrap md:grid-cols-3 gap-3">
+                      <img className="w-[100px] rounded-md shadow-2xl" src={ins.src} alt="instagram" />
+                      <img className="w-[100px] rounded-md shadow-2xl" src={tw.src} alt="instagram" />
+                      <img className="w-[100px] rounded-md shadow-2xl" src={img6.src} alt="instagram" />
+
+                      <img className="w-[100px] rounded-md shadow-2xl" src={img13.src} alt="instagram" />
+                      <img className="w-[100px] rounded-md shadow-2xl" src={img12.src} alt="instagram" />
+                      <img className="w-[100px] rounded-md shadow-2xl" src={img8.src} alt="instagram" />
+                    </div>
+                  </div>
+                  <div className=" lg:col-span-2">
+                    <h4 className="mb-8 font-medium text-2xl">Contact</h4>
+                    <ul className="footer__links flex flex-col gap-4">
+                      <li>
+                        <a className="inline-flex gap-4 items-center" href="#">
+                          <span>
+                            <BsTelephoneForward />
+                          </span>
+                          +91 0987654321
+                        </a>
+                      </li>
+                      <li>
+                        <a className="inline-flex gap-4 items-center" href="#">
+                          <span>
+                            <SlLocationPin />
+                          </span>
+                          Nextjs, v14
+                        </a>
+                      </li>
+                      <li>
+                        <a className="inline-flex gap-4 items-center" href="#">
+                          <span>
+                            <MdOutlineMailOutline />
+                          </span>
+                          delivered@resend.dev
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </Container>
+                <div className="text-center">Copyright © 2024 Web Design Mastery. All rights reserved.</div>
+              </div>
+            </footer>
           </Providers>
 
           {/* <div className="bg-slate-200 p-8">
             <header className="text-center p-8 mb-8 ">
-              <h1 className="text-4xl tracking-widest mb-4">
-                <b>MY BLOG</b>
-              </h1>
-              <p>
+            <h1 className="text-4xl tracking-widest mb-4">
+            <b>MY BLOG</b>
+            </h1>
+            <p>
                 Welcome to the blog of <span className="px-3 py-1 bg-black text-white">unknown</span>
               </p>
             </header>

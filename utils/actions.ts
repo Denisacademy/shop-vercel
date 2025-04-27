@@ -698,6 +698,7 @@ export const sortFieldAndOrderBY = async (searchParams: searchParams) => {
 
 export const fetchOrdersByUser = async (sortField = "orderTotal", sortOrder = "desc"): Promise<Order[]> => {
   const user = await getAuthUser();
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
 
   return await db.order.findMany({
     where: {
